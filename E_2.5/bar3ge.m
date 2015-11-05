@@ -15,6 +15,7 @@ Ku = (EA/l0^3) .* [  x0*u' + u*x0' + u*u', -(x0*u' + u*x0' + u*u');...
 
 % Initial stress matrix
 Ksigma = (N/l0)* [eye(3), -eye(3); -eye(3), eye(3)]; % Three dimensions
+
 Ke = K0 + Ku + Ksigma;
 end
 
