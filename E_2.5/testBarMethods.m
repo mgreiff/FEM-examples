@@ -1,4 +1,8 @@
-clear all;
+clear all;close all;
+% Checks that the bar3* methods have been written correctly by comparing to
+% the Calfem computed values. Note that we work with a transposed force
+% vector.
+
 load('control2e5.mat')
 compK = bar3ge( ec , ep , ed , es );
 disp(compK)
