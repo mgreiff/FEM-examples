@@ -10,7 +10,7 @@ fnew=0;
 unew=0;
 for n=1:nmax;
     fnew=fnew+deltaf;
-    %disp(['loadstep ',num2str(n)])
+    
     for i=1:imax
         K=kt_bar(unew);
         res=fnew-g_bar(unew);
@@ -19,7 +19,6 @@ for n=1:nmax;
         if norm(res) < eps * norm(deltaf)
             break
         end
-        %disp(['iterationstep ',num2str(norm(res))])
     end
     uval=[uval abs(unew/a)];
     fval=[fval abs(fnew*((l0/a)^3/EA))];

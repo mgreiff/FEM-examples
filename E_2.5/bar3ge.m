@@ -1,5 +1,7 @@
 function [ Ke ] = bar3ge( ec , ep , ed , es )
-%Computes the stiffness matrix, with three contributions, see (2.34).
+%% Computes the siffness matrix in a 3D bar element
+% RETURNS
+%     Ke: The stiffness matrix (6x6 array)
 x0 = ec(:,2) - ec(:,1);
 l0 = sqrt(x0'*x0);
 EA = ep(1) * ep(2);
@@ -14,7 +16,7 @@ Ku = (EA/l0^3) .* [  x0*u' + u*x0' + u*u', -(x0*u' + u*x0' + u*u');...
                    -(x0*u' + u*x0' + u*u'),  x0*u' + u*x0' + u*u'];
 
 % Initial stress matrix
-Ksigma = (N/l0)* [eye(3), -eye(3); -eye(3), eye(3)]; % Three dimensions
+Ksigma = (N/l0)* [eye(3), -eye(3); -eye(3), eye(3)];
 
 Ke = K0 + Ku + Ksigma;
 end
