@@ -16,11 +16,7 @@ LIMIT = 1e-4;
 
 u = zeros(ndof, 1);
 f = zeros(ndof,1);
-df = zeros(ndof,1);
-%forceIndices=[321;365;367;369;305];
-%df(forceIndices) = 1e9;
-%bc = bc(1:end-5,:);
-%bc(end-4:end,2) = 1000;
+deltaBC = 10.*ones(5,1);
 
 t = 0.1; % OBS! arbitrarily set
 
@@ -28,10 +24,15 @@ uval = [];
 fval = [];
 
 for n = 1:nmax
-    %Applies force
-    f = f + df;
+    
+    bc(end - 4:end,2) = bc(end - 4:end,2) + deltaBC;
     
     for i = 1:imax
+        iterationBC = bc;
+        if i ~= 1
+            iterationBC(:,2) = 0;
+        end
+            
         % Creates the global stiffness matrix
         K = zeros(ndof);
         for ii = 1:nelm
@@ -57,10 +58,10 @@ for n = 1:nmax
         end
 
         r = f - fint;
-        du = solveq(K , r , bc);
+        [du, ~]= solveq(K , r , iterationBC);
         u = u + du;
 
-        if norm(r) < LIMIT * norm(df)
+        if norm(r) < LIMIT
             break
         end
         if i == imax
