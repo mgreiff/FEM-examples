@@ -3,7 +3,7 @@
 run('dataC6E3.m')
 
 % Plots the original geometry
-if 0
+if 1
     hold on;
     figure(1)
     for ii = 1:length(ex(:,1))
@@ -75,18 +75,17 @@ for n = 1:nmax
     uval = [uval, u];
     fval = [fval, f];
 end
-%% Computes the deformed x and y coordinates
-defx = ex;
-defy = ey;
-for ii = 1:nelm
-    defx(ii,:) = ex(ii,:) + u(edof(ii, 2:2:6))';
-    defx(ii,:) = ex(ii,:) + u(edof(ii, 3:2:7))';
-end
-hold on;
- for ii = 1:length(defx(:,1))
+%% Plots deformed geometry
+ if 1
     ind = [1,2,3,1];
-    for jj = 1:3
-        plot([defx(ii,ind(jj)) , defx(ii, ind(jj + 1))],...
-             [defy(ii,ind(jj)) , defy(ii, ind(jj + 1))], 'b')
+    figure(1)
+    hold on;
+    for ii = 1:nelm
+        defx = ex(ii,:) + u(edof(ii, 2:2:6))';
+        defy = ey(ii,:) + u(edof(ii, 3:2:7))';
+        for jj = 1:3
+            plot([defx(ind(jj)) , defx(ind(jj + 1))'],...
+                 [defy(ind(jj)) , defy(ind(jj + 1))'], 'r')
+        end
     end
-end
+ end

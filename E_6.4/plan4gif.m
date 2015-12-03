@@ -1,6 +1,6 @@
-function [ ee , eff ] = plan3gs( ec , ed )
-% Calculates Green?s strains and the deformation gradient
+function [ ef ] = plan3gf( ec, t, ed , es )
 % Calculating the internal force vector
+% Calculates the stiffness matrix
 x = ec(1,:);
 y = ec(2,:);
 
@@ -20,12 +20,10 @@ B0 = (1/(2*eA)).*[y(2)-y(3),0,          y(3)-y(1),0,            y(1)-y(2),0;
 
 % 3x4 matrix
 a = H * ed;
-eff = a + [1;0;0;1];
 Au = [a(1), 0  ,a(3), 0  ;
        0  ,a(2), 0  ,a(4);
       a(2),a(1),a(4),a(3)];
-  
-Bu = Au * H;
-ee = (B0 + 0.5.*Bu)*ed;
-end
 
+B = B0 + Au * H;
+ef = (B'* es) .* (eA * t);
+end

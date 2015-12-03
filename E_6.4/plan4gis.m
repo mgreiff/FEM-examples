@@ -1,4 +1,4 @@
-function [ ee , eff ] = plan3gs( ec , ed )
+function [ ee , ef ] = plan3gs( ec , ed )
 % Calculates Green?s strains and the deformation gradient
 % Calculating the internal force vector
 x = ec(1,:);
@@ -20,7 +20,7 @@ B0 = (1/(2*eA)).*[y(2)-y(3),0,          y(3)-y(1),0,            y(1)-y(2),0;
 
 % 3x4 matrix
 a = H * ed;
-eff = a + [1;0;0;1];
+ef = a;
 Au = [a(1), 0  ,a(3), 0  ;
        0  ,a(2), 0  ,a(4);
       a(2),a(1),a(4),a(3)];

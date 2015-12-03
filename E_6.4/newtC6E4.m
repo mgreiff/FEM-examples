@@ -1,15 +1,21 @@
-% Newton rhapson solver for exercise 6.1
-run('data.m')
+%%%% Newton rhapson solver for exercise 6.3 %%%%
+%% Define geometry
+run('dataC6E3.m')
 
-% Defines additional material properties
-E = 210*1e9; %[Pa]; ?? D-matrisen st?mmer d? med control.mat
-v = 0.3;
+% Plots the original geometry
+if 1
+    hold on;
+    figure(1)
+    for ii = 1:length(ex(:,1))
+        ind = [1,2,3,1];
+        for jj = 1:3
+            plot([ex(ii,ind(jj)) , ex(ii, ind(jj + 1))],...
+                 [ey(ii,ind(jj)) , ey(ii, ind(jj + 1))], 'b')
+        end
+    end
+end
 
-D = (E/((1+v)*(1-2*v))) .* [1-v, v, 0;   v, 1-v, 0; 0, 0, (1-2*v)/2];
-
-nelm = length(edof(:,1));
-ndof = max(max(edof));
-
+%% Sets iteration constants and initial variables
 nmax = 10;
 imax = 20;
 LIMIT = 1e-4;
@@ -17,16 +23,15 @@ LIMIT = 1e-4;
 u = zeros(ndof, 1);
 f = zeros(ndof,1);
 df = zeros(ndof,1);
-%forceIndices=[321;365;367;369;305];
-%df(forceIndices) = 1e9;
-%bc = bc(1:end-5,:);
-%bc(end-4:end,2) = 1000;
+df([3 5]) = -1e8;
 
-t = 0.1; % OBS! arbitrarily set
+bc = [1 2 6 7;
+      0 0 0 0]';
 
 uval = [];
 fval = [];
 
+%% Newton iteration
 for n = 1:nmax
     %Applies force
     f = f + df;
@@ -60,7 +65,7 @@ for n = 1:nmax
         du = solveq(K , r , bc);
         u = u + du;
 
-        if norm(r) < LIMIT * norm(df)
+        if norm(r([3,5])) < LIMIT * norm(df)
             break
         end
         if i == imax
@@ -70,18 +75,17 @@ for n = 1:nmax
     uval = [uval, u];
     fval = [fval, f];
 end
-%% Computes the deformed x and y coordinates
-defx = ex;
-defy = ey;
-for ii = 1:nelm
-    defx(ii,:) = ex(ii,:) + u(edof(ii, 2:2:6))';
-    defx(ii,:) = ex(ii,:) + u(edof(ii, 3:2:7))';
-end
-hold on;
- for ii = 1:length(defx(:,1))
+%% Plots deformed geometry
+ if 1
     ind = [1,2,3,1];
-    for jj = 1:3
-        plot([defx(ii,ind(jj)) , defx(ii, ind(jj + 1))],...
-             [defy(ii,ind(jj)) , defy(ii, ind(jj + 1))], 'b')
+    figure(1)
+    hold on;
+    for ii = 1:nelm
+        defx = ex(ii,:) + u(edof(ii, 2:2:6))';
+        defy = ey(ii,:) + u(edof(ii, 3:2:7))';
+        for jj = 1:3
+            plot([defx(ind(jj)) , defx(ind(jj + 1))'],...
+                 [defy(ind(jj)) , defy(ind(jj + 1))'], 'r')
+        end
     end
-end
+ end
