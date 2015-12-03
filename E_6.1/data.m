@@ -17,11 +17,6 @@ if 1
         end
     end
 
-    % Plots the vrtices
-    %exhat = reshape(ex, [numel(ex), 1]);
-    %eyhat = reshape(ey, [numel(ey), 1]);
-    %plot(exhat, eyhat, '*r')
-    
     % plots the boundary conditins
     for ii = 1:length(edof(:,1))
         for jj = 1:3

@@ -9,7 +9,7 @@ end
 
 %% Sets constants
 % Ieration constants 
-nmax = 5;
+nmax = 8;
 imax = 20;
 LIMIT = 1e-4;
 
@@ -55,8 +55,6 @@ end
 
 for n = 1:nmax
 
-    disp(['Iteration ', num2str(n)])
-    
     G = zeros(ndof,1);
     
     dlambdai = 0;
@@ -86,12 +84,12 @@ for n = 1:nmax
         dap = solveq(Kt , P , bc);
         
         % Finds a suitable lambda
-        increment = 0.9;
+        increment = 0.7;
         maxCount = 100;
         
         if i == 1
             if n == 1
-                l = 0.5;
+                l = 2;
                 deltalambda = l/sqrt(dap'*dap + psi.*P'*P);
             else
                 s = sign(dan'*dap);
@@ -126,6 +124,7 @@ for n = 1:nmax
                         break;
                     else
                         deltalambda = lambdaSol(1);
+                        disp('lambdaSol(1) == lambdaSol(2)')
                         break;
                     end
                 end
