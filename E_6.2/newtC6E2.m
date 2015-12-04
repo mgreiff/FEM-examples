@@ -1,39 +1,25 @@
 % Newton rhapson solver for exercise 6.1
 run('data.m')
 
-% Defines additional material properties
-E = 210*1e9; %[Pa]; ?? D-matrisen st?mmer d? med control.mat
+E = 210*1e9;
 v = 0.3;
 
 nelm = length(edof(:,1));
 ndof = max(max(edof));
 
-nmax = 20;
+nmax = 5;
 imax = 20;
 LIMIT = 1e-4;
 
 u = zeros(ndof, 1);
 f = zeros(ndof,1);
 
-t = 0.5; % OBS! arbitrarily set
+t = 1;
 
 uval = [];
 fval = [];
 
 bc(end-4:end,2) = 10;
-
-% Sets up initial matrices and constants
-S = cell(nelm,0);
-D = cell(nelm,0);
-for ii = 1:nelm
-    ind = edof(ii,2:end);
-    ec = [ex(ii,:);ey(ii,:)];
-    [ ~ , eff ] = plan3gs( ec , u(ind) );
-    De = mstiff( eff , E, v );
-    Se = stresscal( eff , E, v );
-    S(ii) = {Se};
-    D(ii) = {De};
-end
 
 if 1
     for n = 1:nmax
@@ -44,39 +30,34 @@ if 1
             % Creates the global stiffness matrix
             K = zeros(ndof);
             for ii = 1:nelm
-                ec = [ex(ii,:)', ey(ii,:)'];
+                ec = [ex(ii,:)', ey(ii,:)']';
                 ed = u(edof(ii,2:7));
-                [ ee , ~ ] = plan3gs(ec' , ed);
-                es = S{ii};
-                Ke = plan3ge( ec' , t , D{ii} , ed , es );
-                K(edof(ii,2:7),edof(ii,2:7)) = K(edof(ii,2:7),edof(ii,2:7)) + Ke;
-            end
 
-            % Stresses and strains
-            S = cell(nelm,0);
-            D = cell(nelm,0);
-            for ii = 1:nelm
-                ind = edof(ii,2:end);
-                ec = [ex(ii,:);ey(ii,:)];
-                ed = u(ind);
                 [ ~ , eff ] = plan3gs( ec , ed );
-                De = mstiff( eff , E, v );
-                Se = stresscal( eff , E, v );
-                S(ii) = {Se};
-                D(ii) = {De};
+                D = mstiff( eff , E, v );
+                es = stresscal( eff , E, v );
+
+                Ke = plan3ge( ec , t , D , ed , es );
+                K(edof(ii,2:7),edof(ii,2:7)) = K(edof(ii,2:7),edof(ii,2:7)) + Ke;
             end
         
             fint = zeros(ndof,1);
             for jj = 1:nelm
                 ec = [ex(ii,:)', ey(ii,:)']';
-                es = S{ii};
-                finte = plan3gf( ec, t, ed , es' );
+                ed = u(edof(ii,2:7));
+                
+                [ ~ , eff ] = plan3gs( ec , ed );
+                es = stresscal( eff , E, v );
+                
+                finte = plan3gf( ec, t, ed , es );
                 fint(edof(ii,2:7)) = fint(edof(ii,2:7)) + finte;
             end
 
             r = -fint;
             du = solveq(K , r , deltaBC);
             u = u + du;
+            disp(i)
+            disp(u(1:5)')
 
             deltaBC(:,2) = 0;
 

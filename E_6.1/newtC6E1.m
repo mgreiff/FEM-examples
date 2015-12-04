@@ -17,7 +17,7 @@ LIMIT = 1e-4;
 u = zeros(ndof, 1);
 f = zeros(ndof,1);
 
-t = 0.5; % OBS! arbitrarily set
+t = 1;
 
 uval = [];
 fval = [];

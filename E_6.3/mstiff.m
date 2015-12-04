@@ -1,6 +1,10 @@
 function [ D ] = mstiff( eff , E, v )
 
-    F = [eff(1:2), eff(3:4)];
+    Fmin = [eff(1),eff(2);
+            eff(3),eff(4)];
+    F = zeros(3);
+    F(1:2,1:2) = Fmin;
+    F(3,3) = 1; %Material thickness
 
     C = F'*F;
     invC = inv(C);
@@ -11,7 +15,7 @@ function [ D ] = mstiff( eff , E, v )
     
     Cpp = trace(C);
     
-    a1 = K*J.^2 + ((2.*G)/9)*J^(-2/3)*Cpp;
+    a1 = K*J.^2 + ((2.*G)/9)*J.^(-2/3)*Cpp;
     a2 = ((2.*G)/3)*J^(-2/3);
     a3 = (G/3)*J^(-2/3)*Cpp - (K/2)*(J^2 - 1);
     
@@ -36,7 +40,7 @@ function [ D ] = mstiff( eff , E, v )
             end
             D(row, col) = a1.*invC(i,j).*invC(k,l) - ...
                           a2.*(deltaij.*invC(k,l) + deltakl.*invC(i,j)) + ...
-                          a3.*(invC(i,j).*invC(k,l) + invC(k,l)*invC(i,j));
+                          a3.*(invC(i,k).*invC(j,l) + invC(i,l)*invC(j,k));
         end
     end
 end

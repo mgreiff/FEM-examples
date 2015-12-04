@@ -1,12 +1,8 @@
 clear all; close all;
 load('geom7e1.mat')
 
-% Scales geometry
-ex = ex;
-ey = ey;
-
 %% Plots the elements
-if 1
+if 0
     hold on;
     figure(1)
     for ii = 1:length(ex(:,1))

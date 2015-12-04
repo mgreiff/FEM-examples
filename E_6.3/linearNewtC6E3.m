@@ -42,9 +42,9 @@ for n = 1:nmax
         for ii = 1:nelm
             ec = [ex(ii,:)', ey(ii,:)'];
             ed = u(edof(ii,2:7));
-            [ ~ , eff ] = plan3gs(ec' , ed);
-            D = mstiff( eff , E, v );
-            es = stresscal( eff , E, v );
+            [ ee , ~ ] = plan3gs(ec' , ed);
+            D = (E/((1+v)*(1-2*v))) .* [1-v, v, 0;   v, 1-v, 0; 0, 0, (1-2*v)/2];
+            es = D * ee; % Compute second order poila-kirchoff stress ??
             Ke = plan3ge( ec' , t , D , ed , es );
             K(edof(ii,2:7),edof(ii,2:7)) = K(edof(ii,2:7),edof(ii,2:7)) + Ke;
         end
@@ -53,9 +53,12 @@ for n = 1:nmax
         for jj = 1:nelm
             ec = [ex(ii,:)', ey(ii,:)']';
             
-            [~, eff] = plan3gs( ec , u(edof(ii,2:7)));
-            es = stresscal( eff , E, v );
-            finte = plan3gf( ec, t, ed , es' );
+            [ee, ~] = plan3gs( ec , u(edof(ii,2:7)));
+            A = 0.5*abs(ec(1,1)*(ec(2,2)-ec(2,3))+...
+                ec(1,2)*(ec(2,3)-ec(2,1))+...
+                ec(1,3)*(ec(2,1)-ec(2,2)));
+            es = A.*ee;
+            finte = plan3gf( ec, t, ed , es );
             fint(edof(ii,2:7)) = fint(edof(ii,2:7)) + finte;
         end
 

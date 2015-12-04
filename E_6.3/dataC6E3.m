@@ -10,8 +10,7 @@ edof = [1 1 2 5 6 3 4;
 
 E = 210*1e9;
 v = 0.3;
-t = 0.1; % OBS! arbitrarily set
-D = (E/((1+v)*(1-2*v))) .* [1-v, v, 0;   v, 1-v, 0; 0, 0, (1-2*v)/2];
+t = 1; % OBS! arbitrarily set
 
 nelm = length(edof(:,1));
 ndof = max(max(edof));
