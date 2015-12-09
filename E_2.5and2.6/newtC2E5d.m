@@ -81,7 +81,8 @@ for n = 1:nmax
             
             es = E * ee;
             if useNonLinearMaterialModel
-                es = stress1D( E , ee );
+                D = stress1D( E , ee );
+                es = D*ee;
             end
             x = reshape(ec, [6,1]) + u(edof(ii,2:7));
             l0 = sqrt((ec(:,2) - ec(:,1))'*(ec(:,2) - ec(:,1)));

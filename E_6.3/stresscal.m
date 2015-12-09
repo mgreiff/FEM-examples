@@ -26,5 +26,5 @@ function [ out ] = stresscal( eff , E, v )
                        G.*(J.^(-2/3)).*(deltaij - (Cpp/3).*invC(ii,jj));
         end
     end
-    out = [S(1,1), S(2,2), S(1,2)];
+    out = [S(1,1), S(2,2), S(1,2)]';
 end

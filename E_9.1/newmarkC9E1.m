@@ -50,21 +50,7 @@ aN = zeros(ndof,1);
 velN = zeros(ndof,1);
 accN = zeros(ndof,1);
 fpattern = zeros(ndof,1);
-fpattern(64) = -1e5;
-
-% Sets up initial matrices and constants
-S = cell(nelm,0);
-D = cell(nelm,0);
-for ii = 1:nelm
-    ind = edof(ii,2:end);
-    ec = [ex(ii,:);ey(ii,:)];
-    ed = a(ind);
-    [ ~ , eff ] = plan3gs( ec , ed );
-    De = mstiff( eff , E, v );
-    Se = stresscal( eff , E, v );
-    S(ii) = {Se};
-    D(ii) = {De};
-end
+fpattern(64) = -1;
 
 % Begins iteration
 for n = 1:nmax
@@ -102,8 +88,10 @@ for n = 1:nmax
             ind = edof(ii,2:end);
             ec = [ex(ii,:);ey(ii,:)];
             ed = a(ind);
-            es = S{ii};
-            Ke = plan3ge( ec , t , D{ii} , ed , es );
+            [ ~ , eff ] = plan3gs(ec , ed);
+            D = mstiff( eff , E, v );
+            es = stresscal( eff , E, v );
+            Ke = plan3ge( ec , t , D , ed , es );
             Kt(ind, ind) = Kt(ind, ind) + Ke;
             Me = plan3gm(ec, t, rho);
             M(ind, ind) = M(ind, ind) + Me;
@@ -118,27 +106,14 @@ for n = 1:nmax
         acc = c1.*a-accN;
         vel = c4.*a-velN;
         
-        % Stresses and strains
-        S = cell(nelm,0);
-        D = cell(nelm,0);
-        for ii = 1:nelm
-            ind = edof(ii,2:end);
-            ec = [ex(ii,:);ey(ii,:)];
-            ed = a(ind);
-            [ ~ , eff ] = plan3gs( ec , ed );
-            De = mstiff( eff , E, v );
-            Se = stresscal( eff , E, v );
-            S(ii) = {Se};
-            D(ii) = {De};
-        end
-        
 	    % Compute internal forces
         fint = zeros(ndof,1);
         for ii = 1:nelm
             ind = edof(ii,2:end);
             ec = [ex(ii,:);ey(ii,:)];
             ed = a(ind);
-            es = S{ii};
+            [ ~ , eff ] = plan3gs(ec , ed);
+            es = stresscal( eff , E, v );
             finte = plan3gf( ec, t, ed , es );
             fint(ind) = fint(ind) + finte;
         end

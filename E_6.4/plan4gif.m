@@ -1,31 +1,33 @@
-function [ ef ] = plan3gf( ec, t, ed , es )
+function [ ef ] = plan4gif( ec, t, ed , es )
 % Calculating the internal force vector
-x = ec(1,:);
-y = ec(2,:);
+x = ec(1,:) + ed(1:2:7);
+y = ec(2,:) + ed(2:2:8);
 
-% Compute area of element
-eA = 0.5*abs((x(1)*y(2)-y(1)*x(2))+...
-             (x(2)*y(3)-y(2)*x(3))+...
-             (x(3)*y(4)-y(3)*x(4))+...
-             (x(4)*y(1)-y(4)*x(1)));
+% Computes the Jacobian
+J11 = @(n) sum(x.*[(n-1),-(n-1),(n+1),-(n+1)]./4);
+J12 = @(n) sum(y.*[(n-1),-(n-1),(n+1),-(n+1)]./4);
+J21 = @(xi) sum(x.*[(xi-1),-(xi+1),(xi+1),-(xi-1)]./4);
+J22 = @(xi) sum(y.*[(xi-1),-(xi+1),(xi+1),-(xi-1)]./4);
+J = @(n,xi) [J11(n)  J12(n);
+             J21(xi) J22(xi)];
 
-% 4x6 matrix
-H = (1/(2*eA)).*[y(2) - y(3) , 0 , y(3) - y(1) , 0 , y(1) - y(2) , 0;
-                 x(3) - x(2) , 0 , x(1) - x(3) , 0 , x(2) - x(1) , 0;
-                 0 , y(2) - y(3) , 0 , y(3) - y(1) , 0 , y(1) - y(2);
-                 0 , x(3) - x(2) , 0 , x(1) - x(3) , 0 , x(2) - x(1)];
+B = @(n, xi) [(n-1),    0,  -(n-1),    0,   (n+1)  ,  0,  -(n+1),   0    ;
+                0,   (xi-1),  0,    -(xi+1),   0,  (xi+1),   0,   -(xi-1);
+              (xi-1),(n-1) ,-(xi+1),-(n-1), (xi+1),(n+1), -(xi-1),-(n+1)];
 
-% 3x6 matrix
-B0 = (1/(2*eA)).*[y(2)-y(3),0,          y(3)-y(1),0,            y(1)-y(2),0;
-                  0,x(3)-x(2),          0,x(1)-x(3),            0,x(2)-x(1);
-                  x(3)-x(2),y(2)-y(3),  x(1)-x(3),y(3)-y(1),    x(2)-x(1),y(1)-y(2)];
 
-% 3x4 matrix
-a = H * ed;
-Au = [a(1), 0  ,a(3), 0  ;
-       0  ,a(2), 0  ,a(4);
-      a(2),a(1),a(4),a(3)];
+F = @(n,xi) B(n,xi)'*es.*det(J(n,xi));
 
-B = B0 + Au * H;
-ef = (B'* es) .* (eA * t);
+% Gauss points - four point rule OBS ett S per gauss-punkt
+p = [-sqrt(3/5),0,sqrt(3/5)];
+w = [5/9,8/9,5/9];
+
+ef = 0;
+for ii  = 1:length(p)
+    for jj = 1:length(p)
+        ef = ef + w(ii).*w(jj).*F(p(ii),p(jj)).*t; % dimension 1?
+    end
 end
+end
+
+  

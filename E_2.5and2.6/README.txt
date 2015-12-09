@@ -14,8 +14,6 @@ e) COMPLETE - Run newtC2E5ef.m. Gives good results when the force is applied
               to the z-direction, but not when applied to the y-direction,
               as specified in the task. (set options to [0 0]).
 f) COMPLETE - Run newtC2E5ef.m. (set options to [0 1]).
-g) TODO - Remains to be written, continue on newtUpdated solvers and make
-              newtUpdatedC2E5c.m work.
 
 **2.6**
 a) TODO - Rewrite dmat1D.m

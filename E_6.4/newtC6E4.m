@@ -1,22 +1,9 @@
 %%%% Newton rhapson solver for exercise 6.3 %%%%
 %% Define geometry
-run('dataC6E3.m')
-
-% Plots the original geometry
-if 1
-    hold on;
-    figure(1)
-    for ii = 1:length(ex(:,1))
-        ind = [1,2,3,1];
-        for jj = 1:3
-            plot([ex(ii,ind(jj)) , ex(ii, ind(jj + 1))],...
-                 [ey(ii,ind(jj)) , ey(ii, ind(jj + 1))], 'b')
-        end
-    end
-end
+run('dataC6E4.m')
 
 %% Sets iteration constants and initial variables
-nmax = 10;
+nmax = 5;
 imax = 20;
 LIMIT = 1e-4;
 
