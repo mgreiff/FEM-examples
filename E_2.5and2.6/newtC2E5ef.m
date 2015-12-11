@@ -2,18 +2,19 @@
 a = 9;
 b = 4;
 c = 0.01;
-k = 1;
+k1 = 0.3;
+k2 = 0.3;
 E = 1;
 A = 10;
 
 %%%%%%%%%% Options %%%%%%%%%%%
-useImperfectGeometry = 1;
+useImperfectGeometry = 0;
 useNonLinearMaterialModel = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nmax = 80;
-imax = 50;
-LIMIT = 1e-4;
+imax =30;
+LIMIT = 1e-2;
 
 edof = [1,1,2,3,4,5,6;
         2,4,5,6,7,8,9];
@@ -32,18 +33,19 @@ if useImperfectGeometry
 end
 
 nelm = 2;
-ndof = 10;
+ndof = 11;
 
-df = zeros(10,1);
+df = zeros(ndof,1);
 df(6) = -0.1;
 
-u = zeros(10,1);
-f = zeros(10,1);
+u = zeros(ndof,1);
+f = zeros(ndof,1);
 
-bc = [1,2,3,4,7,8,9,10;
-      0,0,0,0,0,0,0,0]';
-springInd = [5,10];
-        
+bc = [1,2,3,4,7,8,9,10,11;
+      0,0,0,0,0,0,0,0 ,0]';
+spring1Ind = [5,10];
+spring2Ind = [6,11];
+
 ep = [E, A];
 fval = [];
 uval = [];
@@ -59,39 +61,38 @@ for n = 1:nmax
         for ii = 1:nelm
             ec = [ex(ii,:);ey(ii,:);ez(ii,:)];
             ed = u(edof(ii,2:7))';
-            [~ , ee] = bar3gs( ec , ep , ed );
-            es = E * ee;
             if useNonLinearMaterialModel
-                D = dmat1D( E , ee ); %% How is the Dmat matrix computed?
-                es = D * ee;
-            end
-            Ke = bar3ge( ec , ep , ed , es );        
+                [~ , ee] = bar3gsNonLin( ec , ep , ed );
+                Ke = bar3geNonLin( ec , ep , ed , ee );
+            else
+                [es , ~] = bar3gs( ec , ep , ed );
+                Ke = bar3ge( ec , ep , ed , es ); 
+            end       
             K(edof(ii,2:7),edof(ii,2:7)) = K(edof(ii,2:7),edof(ii,2:7)) + Ke;
         end
         
         % Adds spring stiffness to K
-        Kspring = bar1e( k );
-        K(springInd,springInd) = K(springInd,springInd) + Kspring;
-        
+        K(spring1Ind,spring1Ind) = K(spring1Ind,spring1Ind) + bar1e( k1 );
+        K(spring2Ind,spring2Ind) = K(spring2Ind,spring2Ind) + bar1e( k2 );
+         
         % Computes internal forces for bars
-        fint = zeros(10,1);
+        fint = zeros(ndof,1);
         for jj = 1:nelm
             ec = [ex(ii,:);ey(ii,:);ez(ii,:)];
-            [ee, ~] = bar3gs( ec , ep , u(edof(ii,2:7))' );
-            
-            es = E * ee;
+            ed = u(edof(ii,2:7))';
             if useNonLinearMaterialModel
-                es = stress1D( E , ee );
+                [es, ~] = bar3gsNonLin(ec , ep , ed );
+                finte = bar3gf(ec , ed , es);
+            else
+                [es, ~] = bar3gs(ec, ep, ed);
+                finte = bar3gf(ec , ed , es);
             end
-            x = reshape(ec, [6,1]) + u(edof(ii,2:7));
-            l0 = sqrt((ec(:,2) - ec(:,1))'*(ec(:,2) - ec(:,1)));
-            finte = (A / l0) * es * [eye(3), -eye(3); -eye(3), eye(3)] * x;
             fint(edof(ii,2:7)) = fint(edof(ii,2:7)) + finte;
         end
 
         % Computes internal forces for spring
-        springFint  = bar1f(k,u(springInd));
-        fint(springInd) = fint(springInd) + springFint;
+        fint(spring1Ind) = fint(spring1Ind) + bar1f(k1,u(spring1Ind));
+        fint(spring2Ind) = fint(spring2Ind) + bar1f(k2,u(spring2Ind));
         
         r = f - fint;
         du = solveq(K , r , bc);
@@ -141,7 +142,7 @@ if 1
     loops = length(uval(1,:));
     F(loops) = struct('cdata',[],'colormap',[]);
     for ii = 1:loops
-        pause(0.05)
+        pause(0.025)
         subplot(1,2,1);
         hold on;
         for jj = 1:nelm
@@ -153,10 +154,10 @@ if 1
         xlabel('x')
         ylabel('y')
         zlabel('z')
-        axis([0,8,-.02,0.05,-15,9,])
+        axis([0,8,-.02,0.05,-15,9])
         subplot(1,2,2);
-        plot(uval(6,1:ii),fval(6,1:ii),[color,'*'])
-        axis([-25,0,-8,0])
+        plot(uval(6,1:ii),fval(6,1:ii),color)
+        axis([-25,0,df(6)*nmax,0])
         drawnow
         F(ii) = getframe;
     end

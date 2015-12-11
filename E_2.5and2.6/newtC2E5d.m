@@ -2,13 +2,13 @@
 a = 9;
 b = 4;
 c = 0;
-k = 1;
+k = 0.3;
 E = 1;
 A = 10;
 
 %%%%%%%%%% Options %%%%%%%%%%%
 useImperfectGeometry = 0;
-useNonLinearMaterialModel = 0;
+useNonLinearMaterialModel = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nmax = 80;
@@ -35,7 +35,7 @@ nelm = 2;
 ndof = 10;
 
 df = zeros(10,1);
-df(6) = -0.2;
+df(6) = -0.25;
 
 u = zeros(10,1);
 f = zeros(10,1);
@@ -59,13 +59,13 @@ for n = 1:nmax
         for ii = 1:nelm
             ec = [ex(ii,:);ey(ii,:);ez(ii,:)];
             ed = u(edof(ii,2:7))';
-            [~ , ee] = bar3gs( ec , ep , ed );
-            es = E * ee;
             if useNonLinearMaterialModel
-                D = dmat1D( E , ee ); %% How is the Dmat matrix computed?
-                es = D * ee;
-            end
-            Ke = bar3ge( ec , ep , ed , es );        
+                [~ , ee] = bar3gsNonLin( ec , ep , ed );
+                Ke = bar3geNonLin( ec , ep , ed , ee );
+            else
+                [es , ~] = bar3gs( ec , ep , ed );
+                Ke = bar3ge( ec , ep , ed , es ); 
+            end       
             K(edof(ii,2:7),edof(ii,2:7)) = K(edof(ii,2:7),edof(ii,2:7)) + Ke;
         end
         
@@ -77,16 +77,14 @@ for n = 1:nmax
         fint = zeros(10,1);
         for jj = 1:nelm
             ec = [ex(ii,:);ey(ii,:);ez(ii,:)];
-            [ee, ~] = bar3gs( ec , ep , u(edof(ii,2:7))' );
-            
-            es = E * ee;
+            ed = u(edof(ii,2:7))';
             if useNonLinearMaterialModel
-                D = stress1D( E , ee );
-                es = D*ee;
+                [es, ~] = bar3gsNonLin(ec , ep , ed );
+                finte = bar3gf(ec , ed , es);
+            else
+                [es, ~] = bar3gs(ec, ep, ed);
+                finte = bar3gf(ec , ed , es);
             end
-            x = reshape(ec, [6,1]) + u(edof(ii,2:7));
-            l0 = sqrt((ec(:,2) - ec(:,1))'*(ec(:,2) - ec(:,1)));
-            finte = (A / l0) * es * [eye(3), -eye(3); -eye(3), eye(3)] * x;
             fint(edof(ii,2:7)) = fint(edof(ii,2:7)) + finte;
         end
 
@@ -157,7 +155,7 @@ if 1
         axis([0,8,-.02,9,-15,9,])
         subplot(1,2,2);
         plot(uval(6,1:ii),fval(6,1:ii),color)
-        axis([-25,0,-16,0])
+        axis([-25,0,df(6)*nmax,0])
         drawnow
         F(ii) = getframe;
     end

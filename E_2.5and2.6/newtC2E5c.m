@@ -6,13 +6,13 @@ E = 1;
 A = 10;
 
 %%%%%%%%%% Options %%%%%%%%%%%
-useImperfectGeometry = 0;
-useNonLinearMaterialModel = 0;
+useImperfectGeometry = 0;     % df(6) = -0.012 ger bra resultat
+useNonLinearMaterialModel = 0;% df(6) = -0.12 ger bra (?) resultat
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nmax = 80;
 imax = 50;
-LIMIT = 1e-4;
+LIMIT = 1e-3;
 
 edof = [1,1,2,3,4,5,6;
         2,4,5,6,7,8,9];
@@ -34,7 +34,7 @@ nelm = 2;
 ndof = 10;
 
 df = zeros(10,1);
-df(6) = -0.1;
+df(6) = -0.012;
 
 u = zeros(10,1);
 f = zeros(10,1);
@@ -56,8 +56,13 @@ for n = 1:nmax
         for ii = 1:nelm
             ec = [ex(ii,:);ey(ii,:);ez(ii,:)];
             ed = u(edof(ii,2:7))';
-            [~ , es] = bar3gs( ec , ep , ed );
-            Ke = bar3ge( ec , ep , ed , es );        
+            if useNonLinearMaterialModel
+                [~ , ee] = bar3gsNonLin( ec , ep , ed );
+                Ke = bar3geNonLin( ec , ep , ed , ee );
+            else
+                [es , ~] = bar3gs( ec , ep , ed );
+                Ke = bar3ge( ec , ep , ed , es ); 
+            end       
             K(edof(ii,2:7),edof(ii,2:7)) = K(edof(ii,2:7),edof(ii,2:7)) + Ke;
         end
         
@@ -65,20 +70,23 @@ for n = 1:nmax
         fint = zeros(10,1);
         for jj = 1:nelm
             ec = [ex(ii,:);ey(ii,:);ez(ii,:)];
-            [ee, ~] = bar3gs( ec , ep , u(edof(ii,2:7))' );
-            
-            x = reshape(ec, [6,1]) + u(edof(ii,2:7));
-            l0 = sqrt((ec(:,2) - ec(:,1))'*(ec(:,2) - ec(:,1)));
-            
-            finte = (E * A / l0) * ee * [eye(3), -eye(3); -eye(3), eye(3)] * x;
+            ed = u(edof(ii,2:7))';
+            if useNonLinearMaterialModel
+                [es, ~] = bar3gsNonLin(ec , ep , ed );
+                finte = bar3gf(ec , ed , es);
+            else
+                [es, ~] = bar3gs(ec, ep, ed);
+                finte = bar3gf(ec , ed , es);
+            end
             fint(edof(ii,2:7)) = fint(edof(ii,2:7)) + finte;
         end
-
+        
         r = f - fint;
         du = solveq(K , r , bc);
         u = u + du;
 
-        if norm(r(6)) < LIMIT * norm(df)
+        r(bc(:,1)) = 0;
+        if norm(r) < LIMIT
             break
         end
         if i == imax
@@ -106,7 +114,7 @@ if 1
     hold off;
 end
 %% Illustrative movie of the deformation
-if 0
+if 1
     figure(2);
     hold on;
     for ii = 1:nelm
@@ -121,7 +129,7 @@ if 0
     loops = length(uval(1,:));
     F(loops) = struct('cdata',[],'colormap',[]);
     for ii = 1:loops
-        pause(0.05)
+        pause(0.025)
         subplot(1,2,1);
         hold on;
         for jj = 1:nelm
@@ -135,8 +143,8 @@ if 0
         zlabel('z')
         axis([0,8,-.02,9,-15,9,])
         subplot(1,2,2);
-        plot(uval(6,1:ii),fval(6,1:ii),[color,'*'])
-        axis([-25,0,-8,0])
+        plot(uval(6,1:ii),fval(6,1:ii),color)
+        axis([-25,0,df(6)*nmax,0])
         drawnow
         F(ii) = getframe;
     end
