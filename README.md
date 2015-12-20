@@ -8,6 +8,6 @@ Matlab implementations of FEM solvers for non-linear systems
 * Task 6.1 - Complete and presented
 * Task 6.2 - Complete and presented
 * Task 6.3 - Incomplete
-* Task 6.4 - Incomplete
+* Task 6.4 - Complete but not yet presented
 * Task 8.1 - Complete and presented
 * Task 9.1 - Incomplete
