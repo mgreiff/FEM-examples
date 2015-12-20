@@ -1,33 +1,64 @@
 function [ ef ] = plan4gif( ec, t, ed , es )
-% Calculating the internal force vector
-x = ec(1,:) + ed(1:2:7);
-y = ec(2,:) + ed(2:2:8);
+    % Calculating the internal force vector
+    x = ec(1,:);
+    y = ec(2,:);
+    
+    ef = zeros(8,1);
+    
+    p = [-sqrt(1/3),sqrt(1/3)];
 
-% Computes the Jacobian
-J11 = @(n) sum(x.*[(n-1),-(n-1),(n+1),-(n+1)]./4);
-J12 = @(n) sum(y.*[(n-1),-(n-1),(n+1),-(n+1)]./4);
-J21 = @(xi) sum(x.*[(xi-1),-(xi+1),(xi+1),-(xi-1)]./4);
-J22 = @(xi) sum(y.*[(xi-1),-(xi+1),(xi+1),-(xi-1)]./4);
-J = @(n,xi) [J11(n)  J12(n);
-             J21(xi) J22(xi)];
+    wxi = [1,1,1,1];
+    wmu = [1,1,1,1];
+    
+    xipoints = [p,-p];
+    mupoints = [p(1),p(1),p(2),p(2)];
+    
+    for ii  = 1:4
+        xi = xipoints(ii);
+        mu = mupoints(ii);
+        
+        dNxi = [mu-1,-mu+1,mu+1,-mu-1]./4;
+        dNmu = [xi-1,-xi-1,xi+1,-xi+1]./4;
 
-B = @(n, xi) [(n-1),    0,  -(n-1),    0,   (n+1)  ,  0,  -(n+1),   0    ;
-                0,   (xi-1),  0,    -(xi+1),   0,  (xi+1),   0,   -(xi-1);
-              (xi-1),(n-1) ,-(xi+1),-(n-1), (xi+1),(n+1), -(xi-1),-(n+1)];
+        J11 = x*dNxi';
+        J12 = y*dNxi';
+        J21 = x*dNmu';
+        J22 = y*dNmu';
 
+        Jdet = J11*J22-J12*J21;
+        
+        Jinv = [J22,-J12;-J21,J11]./Jdet;
+        
+        gradN = zeros(2,4);
+        for jj = 1:4
+            gradN(:,jj) = Jinv*[dNxi(jj);dNmu(jj)]; 
+        end
 
-F = @(n,xi) B(n,xi)'*es.*det(J(n,xi));
+        Ndx = gradN(1,:);
+        Ndy = gradN(2,:);
+        
+        B0 = [Ndx(1),0     ,Ndx(2),0     ,Ndx(3),0     ,Ndx(4),0     ;
+              0     ,Ndy(1),0     ,Ndy(2),0     ,Ndy(3),0     ,Ndy(4);
+              Ndy(1),Ndx(1),Ndy(2),Ndx(2),Ndy(3),Ndx(3),Ndy(4),Ndx(4)];
 
-% Gauss points - four point rule OBS ett S per gauss-punkt
-p = [-sqrt(3/5),0,sqrt(3/5)];
-w = [5/9,8/9,5/9];
+        H = [Ndx(1),0     ,Ndx(2),0     ,Ndx(3),0     ,Ndx(4),0     ;
+             Ndy(1),0     ,Ndy(2),0     ,Ndy(3),0     ,Ndy(4),0     ;
+             0     ,Ndx(1),0     ,Ndx(2),0     ,Ndx(3),0     ,Ndx(4);
+             0     ,Ndy(1),0     ,Ndy(2),0     ,Ndy(3),0     ,Ndy(4)];
 
-ef = 0;
-for ii  = 1:length(p)
-    for jj = 1:length(p)
-        ef = ef + w(ii).*w(jj).*F(p(ii),p(jj)).*t; % dimension 1?
+        duxdx = Ndx*ed(1:2:7)';
+        duxdy = Ndy*ed(1:2:7)';
+        duydx = Ndx*ed(2:2:8)';
+        duydy = Ndy*ed(2:2:8)';
+
+        A = [duxdx,0    ,duydx,0    ;
+             0    ,duxdy,0    ,duydy;
+             duxdy,duxdx,duydy,duydx];
+
+        B = B0 + A*H;
+        
+        ef = ef + wxi(ii).*wmu(ii).*(B'*es{ii}).*Jdet.*t;
     end
-end
 end
 
   
