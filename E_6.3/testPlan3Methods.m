@@ -9,3 +9,5 @@ disp('---')
 [ compef ] = plan3gf( ec', t, ed' , es );
 disp(compef'./ef)
 disp('---')
+[compee,~]= plan3gs( ec', ed');
+disp(D*compee./es)
