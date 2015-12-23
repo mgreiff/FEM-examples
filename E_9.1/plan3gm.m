@@ -7,4 +7,3 @@ function Me = plan3gm(ec, t, rho)
         diag(1*ones(2,1),-4);
     Me = rho.*t.*A.*M./12;
 end
-
