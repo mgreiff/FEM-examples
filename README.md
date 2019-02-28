@@ -1,13 +1,12 @@
-# FHL066
-Matlab implementations of FEM solvers for non-linear systems
+# Finite Element Method examples
+This is meant as supplementary materials and help to aid understanding of the
+algorithms presented in the book by Stephen Krenk, see the Bib-entry below.
 
-* Task 1.3 - Complete and presented
-* Task 1.5 - Complete and presented
-* Task 2.5 - Complete but not yet presented
-* Task 2.6 - Complete but not yet presented
-* Task 6.1 - Complete and presented
-* Task 6.2 - Complete and presented
-* Task 6.3 - Complete but not yet presented
-* Task 6.4 - Complete but not yet presented
-* Task 8.1 - Complete and presented
-* Task 9.1 - Complete but not yet presented
+@book{krenk_2009,
+  place={Cambridge},
+  title={Non-linear Modeling and Analysis of Solids and Structures},
+  DOI={10.1017/CBO9780511812163},
+  publisher={Cambridge University Press},
+  author={Krenk, Steen},
+  year={2009}
+}
