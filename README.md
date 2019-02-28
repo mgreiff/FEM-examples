@@ -28,7 +28,12 @@ of the assignments in the book, specifically exercises
 * 8.1
 * 9.1
 
+## Getting started
+You will need Matlab installed with verion R2016a or later. In addition, you will require the [CALFEM](https://github.com/CALFEM/calfem-matlab) package which you can install for usage in Matlab. Once cloned, you will need to add the path to calfem to the Matlab path by running
 
+  ```
+  addpath([path-to-calfem, "/calfem-matlab/fem"])
+  ```
 
 ## Contributing
 
