@@ -35,6 +35,8 @@ You will need Matlab installed with verion R2016a or later. In addition, you wil
   addpath([path-to-calfem, "/calfem-matlab/fem"])
   ```
 
+You can then proceed by running any of the tests, or any of the examples individually.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](https://github.com/mgreiff/FHL066/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
